@@ -1,0 +1,7 @@
+{
+  "plugins": [
+    "expo-sqlite"
+  ],
+  "name": "synergy-notes",
+  "slug": "synergy-notes"
+}
