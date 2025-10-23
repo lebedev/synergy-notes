@@ -10,16 +10,16 @@ import {
 import {
   SQLiteProvider,
   useSQLiteContext,
-  type SQLiteDatabase,
 } from 'expo-sqlite';
+import { addNoteAsync, deleteItemAsync, migrateDbIfNeeded, updateItemAsDoneAsync } from './helpers/db';
 
 /**
  * The Item type represents a single item in database.
  */
-interface ItemEntity {
+interface NoteEntity {
   id: number;
-  done: boolean;
-  value: string;
+  title: string;
+  content: string;
 }
 
 //#region Components
@@ -35,22 +35,15 @@ export default function App() {
 function Main() {
   const db = useSQLiteContext();
   const [text, setText] = useState('');
-  const [todoItems, setTodoItems] = useState<ItemEntity[]>([]);
-  const [doneItems, setDoneItems] = useState<ItemEntity[]>([]);
+  const [notes, setNotes] = useState<NoteEntity[]>([]);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const refetchItems = useCallback(() => {
     async function refetch() {
       await db.withExclusiveTransactionAsync(async () => {
-        setTodoItems(
-          await db.getAllAsync<ItemEntity>(
-            'SELECT * FROM items WHERE done = ?',
-            false
-          )
-        );
-        setDoneItems(
-          await db.getAllAsync<ItemEntity>(
-            'SELECT * FROM items WHERE done = ?',
-            true
+        setNotes(
+          await db.getAllAsync<NoteEntity>(
+            'SELECT * FROM notes'
           )
         );
       });
@@ -64,13 +57,13 @@ function Main() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>SQLite Example</Text>
+      <Text style={styles.heading}>Synergy Notes</Text>
 
       <View style={styles.flexRow}>
         <TextInput
           onChangeText={(text) => setText(text)}
           onSubmitEditing={async () => {
-            await addItemAsync(db, text);
+            await addNoteAsync(db, text);
             await refetchItems();
             setText('');
           }}
@@ -83,26 +76,12 @@ function Main() {
       <ScrollView style={styles.listArea}>
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeading}>Todo</Text>
-          {todoItems.map((item) => (
-            <Item
-              key={item.id}
-              item={item}
-              onPressItem={async (id) => {
-                await updateItemAsDoneAsync(db, id);
-                await refetchItems();
-              }}
-            />
-          ))}
-        </View>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeading}>Completed</Text>
-          {doneItems.map((item) => (
-            <Item
-              key={item.id}
-              item={item}
-              onPressItem={async (id) => {
-                await deleteItemAsync(db, id);
-                await refetchItems();
+          {notes.map((note) => (
+            <Note
+              key={note.id}
+              note={note}
+              onPressItem={(id) => {
+                setSelectedId(id);
               }}
             />
           ))}
@@ -112,70 +91,24 @@ function Main() {
   );
 }
 
-function Item({
-  item,
+function Note({
+  note,
   onPressItem,
 }: {
-  item: ItemEntity;
+  note: NoteEntity;
   onPressItem: (id) => void | Promise<void>;
 }) {
-  const { id, done, value } = item;
+  const { id, title, content } = note;
   return (
     <TouchableOpacity
       onPress={() => onPressItem && onPressItem(id)}
-      style={[styles.item, done && styles.itemDone]}
+      style={[styles.item, title && styles.itemDone]}
     >
-      <Text style={[styles.itemText, done && styles.itemTextDone]}>
-        {value}
+      <Text style={[styles.itemText, content && styles.itemTextDone]}>
+        {content}
       </Text>
     </TouchableOpacity>
   );
-}
-
-//#endregion
-
-//#region Database Operations
-
-async function addItemAsync(db: SQLiteDatabase, text: string): Promise<void> {
-  if (text !== '') {
-    await db.runAsync(
-      'INSERT INTO items (done, value) VALUES (?, ?);',
-      false,
-      text
-    );
-  }
-}
-
-async function updateItemAsDoneAsync(
-  db: SQLiteDatabase,
-  id: number
-): Promise<void> {
-  await db.runAsync('UPDATE items SET done = ? WHERE id = ?;', true, id);
-}
-
-async function deleteItemAsync(db: SQLiteDatabase, id: number): Promise<void> {
-  await db.runAsync('DELETE FROM items WHERE id = ?;', id);
-}
-
-async function migrateDbIfNeeded(db: SQLiteDatabase) {
-  const DATABASE_VERSION = 1;
-  let { user_version: currentDbVersion } = await db.getFirstAsync<{
-    user_version: number;
-  }>('PRAGMA user_version');
-  if (currentDbVersion >= DATABASE_VERSION) {
-    return;
-  }
-  if (currentDbVersion === 0) {
-    await db.execAsync(`
-PRAGMA journal_mode = 'wal';
-CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY NOT NULL, done INT, value TEXT);
-`);
-    currentDbVersion = 1;
-  }
-  // if (currentDbVersion === 1) {
-  //   Add more migrations
-  // }
-  await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
 //#endregion
