@@ -7,10 +7,10 @@
   },
   "dependencies": {
     "@types/react": "~19.1.10",
-    "expo": "^54.0.1",
+    "expo": "^54.0.19",
     "expo-sqlite": "~16.0.8",
     "react": "19.1.0",
-    "react-native": "0.81.4",
+    "react-native": "^0.81.5",
     "typescript": "~5.9.2"
   },
   "name": "synergy-notes",
