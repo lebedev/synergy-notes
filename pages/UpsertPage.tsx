@@ -10,28 +10,30 @@ import {
 import {
   useSQLiteContext,
 } from 'expo-sqlite';
-import { getNote, NoteEntity, updateNoteAsync } from '../helpers/db';
+import { addNoteAsync, getNote, NoteEntity, updateNoteAsync } from '../helpers/db';
 
 type Props = {
   selectedId: number | null;
   goToList: () => void;
   stopEditing: () => void;
+  selectId: (id: number) => void;
 };
 
-export function UpsertPage({ selectedId, goToList, stopEditing }: Props) {
+export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Props) {
   const db = useSQLiteContext();
   const [note, setNote] = useState<NoteEntity | null>(() => getNote(db, selectedId));
 
-  const [title, setTitle] = useState<string>(note.title ?? '');
-  const [content, setContent] = useState<string>(note.content ?? '');
+  const [title, setTitle] = useState<string>(note?.title ?? '');
+  const [content, setContent] = useState<string>(note?.content ?? '');
 
   const saveNote = async () => {
     if (selectedId) {
       await updateNoteAsync(db, selectedId, title, content);
-      stopEditing();
     } else {
-      stopEditing();
+      const createdNoteId = await addNoteAsync(db, title, content);
+      selectId(createdNoteId);
     }
+    stopEditing();
   };
 
   return (

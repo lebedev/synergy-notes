@@ -3,22 +3,21 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import {
   useSQLiteContext,
 } from 'expo-sqlite';
-import { addNoteAsync, NoteEntity } from '../helpers/db';
+import { NoteEntity } from '../helpers/db';
 
 type Props = {
   selectId: (id: number) => void;
+  createNote: () => void;
 };
 
-export function IndexPage({ selectId }: Props) {
+export function IndexPage({ selectId, createNote }: Props) {
   const db = useSQLiteContext();
-  const [text, setText] = useState('');
   const [notes, setNotes] = useState<NoteEntity[]>([]);
 
   const refetchItems = useCallback(() => {
@@ -41,20 +40,12 @@ export function IndexPage({ selectId }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Синергичные заметки</Text>
-
-      <View style={styles.flexRow}>
-        <TextInput
-          onChangeText={(text) => setText(text)}
-          onSubmitEditing={async () => {
-            await addNoteAsync(db, text);
-            await refetchItems();
-            setText('');
-          }}
-          placeholder="what do you need to do?"
-          style={styles.input}
-          value={text}
-        />
-      </View>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={createNote}
+      >
+        <Text style={styles.heading}>+</Text>
+      </TouchableOpacity>
 
       <ScrollView style={styles.listArea}>
         <View style={styles.sectionContainer}>
@@ -86,7 +77,7 @@ function Note({
       style={[styles.item, title && styles.itemDone]}
     >
       <Text style={[styles.itemText, content && styles.itemTextDone]}>
-        {content}
+        {title}
       </Text>
     </TouchableOpacity>
   );
@@ -103,8 +94,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  flexRow: {
-    flexDirection: 'row',
+  addButton: {
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 8,
+    bottom: 32,
+    width: 64,
+    height: 64,
+    backgroundColor:'#fff',
+    borderRadius: 32,
+    zIndex: 1,
   },
   input: {
     borderColor: '#4630eb',

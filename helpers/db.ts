@@ -1,13 +1,13 @@
 import { SQLiteDatabase } from 'expo-sqlite';
 
-export async function addNoteAsync(db: SQLiteDatabase, text: string): Promise<void> {
-  if (text !== '') {
-    await db.runAsync(
-      'INSERT INTO notes (title, content) VALUES (?, ?);',
-      text,
-      text,
-    );
-  }
+export async function addNoteAsync(db: SQLiteDatabase, title: string, content: string): Promise<number> {
+  const { lastInsertRowId } = await db.runAsync(
+    'INSERT INTO notes (title, content) VALUES (?, ?);',
+    title,
+    content,
+  );
+
+  return lastInsertRowId;
 }
 
 export async function updateNoteAsync(

@@ -21,7 +21,12 @@ function Router() {
 
   if (!selectedId && !isEditing) {
     return (
-      <IndexPage selectId={setSelectedId} />
+      <IndexPage
+        selectId={setSelectedId}
+        createNote={() => {
+          setIsEditing(true);
+        }}
+      />
     );
   }
 
@@ -34,6 +39,7 @@ function Router() {
           setIsEditing(false);
         }}
         stopEditing={() => setIsEditing(false)}
+        selectId={setSelectedId}
       />
     );
   }
