@@ -10,34 +10,59 @@ import {
 import {
   useSQLiteContext,
 } from 'expo-sqlite';
-import { getNote, NoteEntity } from '../helpers/db';
+import { deleteNoteAsync, getNote, NoteEntity } from '../helpers/db';
 
 type Props = {
   selectedId: number;
-  goBack: () => void;
+  goToList: () => void;
+  startEditing: () => void;
 };
 
-export function ShowPage({ selectedId, goBack }: Props) {
+export function ShowPage({ selectedId, goToList, startEditing }: Props) {
   const db = useSQLiteContext();
   const [note, setNote] = useState<NoteEntity | null>(() => getNote(db, selectedId));
 
   if (!note) {
-    goBack();
+    goToList();
 
     return null;
   }
 
+  const remove = async () => {
+    await deleteNoteAsync(db, selectedId);
+    goToList();
+  }
+
   return (
     <View style={styles.container}>
-
       <TouchableOpacity
-        onPress={goBack}
+        onPress={goToList}
         style={styles.backButton}
       >
         <Text
           style={styles.heading}
         >
           ←
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={startEditing}
+        style={styles.editButton}
+      >
+        <Text
+          style={styles.heading}
+        >
+          ✏️
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={remove}
+        style={styles.removeButton}
+      >
+        <Text
+          style={styles.heading}
+        >
+          🗑️
         </Text>
       </TouchableOpacity>
       <Text style={styles.heading}>{note.title}</Text>
@@ -95,6 +120,20 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: 4,
+    top: 58,
+    padding: 8,
+    zIndex: 1,
+  },
+  editButton: {
+    position: 'absolute',
+    right: 36,
+    top: 58,
+    padding: 8,
+    zIndex: 1,
+  },
+  removeButton: {
+    position: 'absolute',
+    right: 4,
     top: 58,
     padding: 8,
     zIndex: 1,

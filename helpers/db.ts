@@ -10,15 +10,17 @@ export async function addNoteAsync(db: SQLiteDatabase, text: string): Promise<vo
   }
 }
 
-export async function updateItemAsDoneAsync(
+export async function updateNoteAsync(
   db: SQLiteDatabase,
-  id: number
+  id: number,
+  title: string,
+  content: string,
 ): Promise<void> {
-  await db.runAsync('UPDATE items SET done = ? WHERE id = ?;', true, id);
+  await db.runAsync('UPDATE notes SET title = ?, content = ? WHERE id = ?;', title, content, id);
 }
 
-export async function deleteItemAsync(db: SQLiteDatabase, id: number): Promise<void> {
-  await db.runAsync('DELETE FROM items WHERE id = ?;', id);
+export async function deleteNoteAsync(db: SQLiteDatabase, id: number): Promise<void> {
+  await db.runAsync('DELETE FROM notes WHERE id = ?;', id);
 }
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {

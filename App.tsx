@@ -5,6 +5,7 @@ import {
 import { migrateDbIfNeeded } from './helpers/db';
 import { IndexPage } from './pages/IndexPage';
 import { ShowPage } from './pages/ShowPage';
+import { UpsertPage } from './pages/UpsertPage';
 
 export default function App() {
   return (
@@ -16,10 +17,32 @@ export default function App() {
 
 function Router() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  return selectedId ? (
-    <ShowPage selectedId={selectedId} goBack={() => setSelectedId(null)} />
-  ) : (
-    <IndexPage selectId={setSelectedId} />
+  if (!selectedId && !isEditing) {
+    return (
+      <IndexPage selectId={setSelectedId} />
+    );
+  }
+
+  if (isEditing) {
+    return (
+      <UpsertPage
+        selectedId={selectedId}
+        goToList={() => {
+          setSelectedId(null);
+          setIsEditing(false);
+        }}
+        stopEditing={() => setIsEditing(false)}
+      />
+    );
+  }
+
+  return (
+    <ShowPage
+      selectedId={selectedId}
+      goToList={() => setSelectedId(null)}
+      startEditing={() => setIsEditing(true)}
+    />
   );
 }
