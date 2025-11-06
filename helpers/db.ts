@@ -45,3 +45,9 @@ DROP TABLE IF EXISTS items;
   }
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
+
+export type NoteEntity = {
+  id: number;
+  title: string;
+  content: string;
+};

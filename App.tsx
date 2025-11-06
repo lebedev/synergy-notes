@@ -1,171 +1,28 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
   View,
+  Text,
 } from 'react-native';
 import {
   SQLiteProvider,
-  useSQLiteContext,
 } from 'expo-sqlite';
-import { addNoteAsync, deleteItemAsync, migrateDbIfNeeded, updateItemAsDoneAsync } from './helpers/db';
-
-/**
- * The Item type represents a single item in database.
- */
-interface NoteEntity {
-  id: number;
-  title: string;
-  content: string;
-}
-
-//#region Components
+import { migrateDbIfNeeded } from './helpers/db';
+import { IndexPage } from 'pages/IndexPage';
 
 export default function App() {
   return (
     <SQLiteProvider databaseName="db.db" onInit={migrateDbIfNeeded}>
-      <Main />
+      <Router />
     </SQLiteProvider>
   );
 }
 
-function Main() {
-  const db = useSQLiteContext();
-  const [text, setText] = useState('');
-  const [notes, setNotes] = useState<NoteEntity[]>([]);
+function Router() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const refetchItems = useCallback(() => {
-    async function refetch() {
-      await db.withExclusiveTransactionAsync(async () => {
-        setNotes(
-          await db.getAllAsync<NoteEntity>(
-            'SELECT * FROM notes'
-          )
-        );
-      });
-    }
-    refetch();
-  }, [db]);
-
-  useEffect(() => {
-    refetchItems();
-  }, []);
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Synergy Notes</Text>
-
-      <View style={styles.flexRow}>
-        <TextInput
-          onChangeText={(text) => setText(text)}
-          onSubmitEditing={async () => {
-            await addNoteAsync(db, text);
-            await refetchItems();
-            setText('');
-          }}
-          placeholder="what do you need to do?"
-          style={styles.input}
-          value={text}
-        />
-      </View>
-
-      <ScrollView style={styles.listArea}>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeading}>Todo</Text>
-          {notes.map((note) => (
-            <Note
-              key={note.id}
-              note={note}
-              onPressItem={(id) => {
-                setSelectedId(id);
-              }}
-            />
-          ))}
-        </View>
-      </ScrollView>
-    </View>
+  return selectedId ? (
+    <View><Text>selected note {selectedId}</Text></View>
+  ) : (
+    <IndexPage selectId={setSelectedId} />
   );
 }
-
-function Note({
-  note,
-  onPressItem,
-}: {
-  note: NoteEntity;
-  onPressItem: (id) => void | Promise<void>;
-}) {
-  const { id, title, content } = note;
-  return (
-    <TouchableOpacity
-      onPress={() => onPressItem && onPressItem(id)}
-      style={[styles.item, title && styles.itemDone]}
-    >
-      <Text style={[styles.itemText, content && styles.itemTextDone]}>
-        {content}
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
-//#endregion
-
-//#region Styles
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-    flex: 1,
-    paddingTop: 64,
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  flexRow: {
-    flexDirection: 'row',
-  },
-  input: {
-    borderColor: '#4630eb',
-    borderRadius: 4,
-    borderWidth: 1,
-    flex: 1,
-    height: 48,
-    margin: 16,
-    padding: 8,
-  },
-  listArea: {
-    backgroundColor: '#f0f0f0',
-    flex: 1,
-    paddingTop: 16,
-  },
-  sectionContainer: {
-    marginBottom: 16,
-    marginHorizontal: 16,
-  },
-  sectionHeading: {
-    fontSize: 18,
-    marginBottom: 8,
-  },
-  item: {
-    backgroundColor: '#fff',
-    borderColor: '#000',
-    borderWidth: 1,
-    padding: 8,
-  },
-  itemDone: {
-    backgroundColor: '#1c9963',
-  },
-  itemText: {
-    color: '#000',
-  },
-  itemTextDone: {
-    color: '#fff',
-  },
-});
-
-//#endregion
