@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import {
-  View,
-  Text,
-} from 'react-native';
-import {
   SQLiteProvider,
 } from 'expo-sqlite';
 import { migrateDbIfNeeded } from './helpers/db';
-import { IndexPage } from 'pages/IndexPage';
+import { IndexPage } from './pages/IndexPage';
+import { ShowPage } from './pages/ShowPage';
 
 export default function App() {
   return (
@@ -21,7 +18,7 @@ function Router() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   return selectedId ? (
-    <View><Text>selected note {selectedId}</Text></View>
+    <ShowPage selectedId={selectedId} goBack={() => setSelectedId(null)} />
   ) : (
     <IndexPage selectId={setSelectedId} />
   );

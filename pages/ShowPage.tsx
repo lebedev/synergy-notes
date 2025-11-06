@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -10,62 +10,56 @@ import {
 import {
   useSQLiteContext,
 } from 'expo-sqlite';
-import { addNoteAsync, NoteEntity } from '../helpers/db';
+import { getNote, NoteEntity } from '../helpers/db';
 
 type Props = {
-  selectId: (id: number) => void;
+  selectedId: number;
+  goBack: () => void;
 };
 
-export function IndexPage({ selectId }: Props) {
+export function ShowPage({ selectedId, goBack }: Props) {
   const db = useSQLiteContext();
-  const [text, setText] = useState('');
-  const [notes, setNotes] = useState<NoteEntity[]>([]);
+  const [note, setNote] = useState<NoteEntity | null>(() => getNote(db, selectedId));
 
-  const refetchItems = useCallback(() => {
-    async function refetch() {
-      await db.withExclusiveTransactionAsync(async () => {
-        setNotes(
-          await db.getAllAsync<NoteEntity>(
-            'SELECT * FROM notes'
-          )
-        );
-      });
-    }
-    refetch();
-  }, [db]);
+  if (!note) {
+    goBack();
 
-  useEffect(() => {
-    refetchItems();
-  }, []);
+    return null;
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Синергичные заметки</Text>
+
+      <TouchableOpacity
+        onPress={goBack}
+        style={styles.backButton}
+      >
+        <Text
+          style={styles.heading}
+        >
+          ←
+        </Text>
+      </TouchableOpacity>
+      <Text style={styles.heading}>{note.title}</Text>
 
       <View style={styles.flexRow}>
         <TextInput
-          onChangeText={(text) => setText(text)}
-          onSubmitEditing={async () => {
-            await addNoteAsync(db, text);
-            await refetchItems();
-            setText('');
-          }}
+          onChangeText={() => {}}
+          onSubmitEditing={() => {}}
           placeholder="what do you need to do?"
           style={styles.input}
-          value={text}
+          value={"azaza"}
         />
       </View>
 
       <ScrollView style={styles.listArea}>
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeading}>Todo</Text>
-          {notes.map((note) => (
             <Note
               key={note.id}
               note={note}
-              onPressItem={selectId}
+              onPressItem={() => {}}
             />
-          ))}
         </View>
       </ScrollView>
     </View>
@@ -97,6 +91,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     flex: 1,
     paddingTop: 64,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 4,
+    top: 58,
+    padding: 8,
+    zIndex: 1,
   },
   heading: {
     fontSize: 20,

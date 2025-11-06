@@ -46,6 +46,10 @@ DROP TABLE IF EXISTS items;
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
+export function getNote(db: SQLiteDatabase, id: number): NoteEntity | null {
+  return db.getFirstSync('SELECT * FROM notes WHERE id = ?', id);
+}
+
 export type NoteEntity = {
   id: number;
   title: string;
