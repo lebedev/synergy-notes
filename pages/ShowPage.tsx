@@ -84,9 +84,9 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
           <Text style={styles.text}>Дата: {note.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
         </View>
         <View style={styles.sectionContainer}>
-          <Text style={styles.text}>Заметка создана: {note.createdAt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
-          {note.createdAt.getTime() !== note.updatedAt.getTime() ? (
-            <Text style={styles.text}>Заметка обновлена: {note.updatedAt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+          <Text style={styles.text}>Заметка создана: {note.created_at.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+          {note.created_at.getTime() !== note.updated_at.getTime() ? (
+            <Text style={styles.text}>Заметка обновлена: {note.updated_at.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
           ) : null}
         </View>
       </ScrollView>

@@ -10,46 +10,43 @@ import {
   useSQLiteContext,
 } from 'expo-sqlite';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getNotes, NoteEntity } from '../helpers/db';
+import { getNotes, NoteEntity, SortingDirection, SortingField } from '../helpers/db';
 
 type Props = {
   selectId: (id: number) => void;
   createNote: () => void;
 };
 
-const SORTING_FIELDS = ['date', 'createdAt', 'updatedAt'];
-type SortingField = typeof SORTING_FIELDS[number];
+const SORTING_FIELDS: SortingField[] = ['date', 'created_at', 'updated_at'];
 const SORTING_FIELDS_LABELS: Record<SortingField, string> = {
   date: 'дата',
-  createdAt: 'дата создания',
-  updatedAt: 'дата обновления',
+  created_at: 'дата создания',
+  updated_at: 'дата обновления',
 };
 
 export function IndexPage({ selectId, createNote }: Props) {
   const insets = useSafeAreaInsets();
   const db = useSQLiteContext();
-  const [notes, setNotes] = useState<NoteEntity[]>(() => getNotes(db));
-  const [currentSortingField, setCurrentSortingField] = useState<SortingField>('createdAt');
-  const [sortingDirection, setSortingDirection] = useState<'asc' | 'desc'>('desc');
+  const [currentSortingField, setCurrentSortingField] = useState<SortingField>('created_at');
+  const [sortingDirection, setSortingDirection] = useState<SortingDirection>('DESC');
+  const [notes, setNotes] = useState<NoteEntity[] | null>(null);
 
   const changeSorting = useCallback((sortingField: SortingField) => {
     setCurrentSortingField(sortingField);
 
     const nextSortingDirection = (() => {
       if (currentSortingField === sortingField) {
-        return sortingDirection === 'desc' ? 'asc' : 'desc';
+        return sortingDirection === 'DESC' ? 'ASC' : 'DESC';
       } else {
-        return 'desc';
+        return 'DESC';
       }
     })();
     setSortingDirection(nextSortingDirection);
   }, [currentSortingField, sortingDirection]);
 
   useEffect(() => {
-    setNotes((prevNotes) => [...prevNotes].sort(
-      (noteA, noteB) => (sortingDirection === 'desc' ? 1 : -1) * (noteB[currentSortingField].getTime() - noteA[currentSortingField].getTime()))
-    );
-  }, [currentSortingField, sortingDirection]);
+    setNotes(getNotes(db, currentSortingField, sortingDirection));
+  }, [db, currentSortingField, sortingDirection]);
 
   return (
     <View style={[
@@ -70,123 +67,124 @@ export function IndexPage({ selectId, createNote }: Props) {
       </TouchableOpacity>
 
       <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom }]}>
-        <View style={{ paddingBottom: 2 * insets.bottom }}>
+        {notes ? (
+          <View style={{ paddingBottom: 2 * insets.bottom }}>
+            {notes.length === 0 ? (
+              <Text style={styles.sectionHeading}>Пока нет заметок! Создайте новую, нажав на + в углу.</Text>
+            ) : (
+              <>
+                <View style={styles.flexRow}>
+                  <Text style={styles.sectionHeading}>Сортировка: </Text>
 
-          {notes.length === 0 ? (
-            <Text style={styles.sectionHeading}>Пока нет заметок! Создайте новую, нажав на + в углу.</Text>
-          ) : (
-            <>
-              <View style={styles.flexRow}>
-                <Text style={styles.sectionHeading}>Сортировка: </Text>
-
-                {SORTING_FIELDS.map((sortingField, index) => (
-                  <Fragment key={sortingField}>
-                    <TouchableOpacity
-                      onPress={() => changeSorting(sortingField)}
-                    >
-                      <Text style={styles.sectionHeading}>
-                        <Text style={currentSortingField === sortingField && styles.bold}>
-                          {SORTING_FIELDS_LABELS[sortingField]}
-                          {currentSortingField === sortingField ? (
-                            <Text>{sortingDirection === 'desc' ? ' ↓' : ' ↑'}</Text>
-                          ) : null}
+                  {SORTING_FIELDS.map((sortingField, index) => (
+                    <Fragment key={sortingField}>
+                      <TouchableOpacity
+                        onPress={() => changeSorting(sortingField)}
+                      >
+                        <Text style={styles.sectionHeading}>
+                          <Text style={currentSortingField === sortingField && styles.bold}>
+                            {SORTING_FIELDS_LABELS[sortingField]}
+                            {currentSortingField === sortingField ? (
+                              <Text>{sortingDirection === 'DESC' ? ' ↓' : ' ↑'}</Text>
+                            ) : null}
+                          </Text>
                         </Text>
-                      </Text>
-                    </TouchableOpacity>
-                    {index !== SORTING_FIELDS.length - 1 ? (
-                      <Text style={styles.sectionHeading}>, </Text>
-                    ) : null}
-                  </Fragment>
+                      </TouchableOpacity>
+                      {index !== SORTING_FIELDS.length - 1 ? (
+                        <Text style={styles.sectionHeading}>, </Text>
+                      ) : null}
+                    </Fragment>
+                  ))}
+                </View>
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
                 ))}
-              </View>
-              {notes.map((note) => (
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
+                ))}
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
+                ))}
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
+                ))}
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
+                ))}
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
+                ))}
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
+                ))}
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
+                ))}
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
+                ))}
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
+                ))}
+                {notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    note={note}
+                    onPressItem={selectId}
+                  />
+                ))}
                 <Note
-                  key={note.id}
-                  note={note}
+                  key={notes[0].id}
+                  note={{
+                    ...notes[0],
+                    title: 'LAST'
+                  }}
                   onPressItem={selectId}
                 />
-              ))}
-              {notes.map((note) => (
-                <Note
-                  key={note.id}
-                  note={note}
-                  onPressItem={selectId}
-                />
-              ))}
-              {notes.map((note) => (
-                <Note
-                  key={note.id}
-                  note={note}
-                  onPressItem={selectId}
-                />
-              ))}
-              {notes.map((note) => (
-                <Note
-                  key={note.id}
-                  note={note}
-                  onPressItem={selectId}
-                />
-              ))}
-              {notes.map((note) => (
-                <Note
-                  key={note.id}
-                  note={note}
-                  onPressItem={selectId}
-                />
-              ))}
-              {notes.map((note) => (
-                <Note
-                  key={note.id}
-                  note={note}
-                  onPressItem={selectId}
-                />
-              ))}
-              {notes.map((note) => (
-                <Note
-                  key={note.id}
-                  note={note}
-                  onPressItem={selectId}
-                />
-              ))}
-              {notes.map((note) => (
-                <Note
-                  key={note.id}
-                  note={note}
-                  onPressItem={selectId}
-                />
-              ))}
-              {notes.map((note) => (
-                <Note
-                  key={note.id}
-                  note={note}
-                  onPressItem={selectId}
-                />
-              ))}
-              {notes.map((note) => (
-                <Note
-                  key={note.id}
-                  note={note}
-                  onPressItem={selectId}
-                />
-              ))}
-              {notes.map((note) => (
-                <Note
-                  key={note.id}
-                  note={note}
-                  onPressItem={selectId}
-                />
-              ))}
-              <Note
-                key={notes[0].id}
-                note={{
-                  ...notes[0],
-                  title: 'LAST'
-                }}
-                onPressItem={selectId}
-              />
-            </>
-          )}
-        </View>
+              </>
+            )}
+          </View>
+        ) : null}
       </ScrollView>
     </View>
   );

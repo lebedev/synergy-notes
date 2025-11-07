@@ -63,13 +63,11 @@ DROP TABLE IF EXISTS items;
 }
 
 function prepareNote(rawNote: RawNoteEntity): NoteEntity {
-  const { date, created_at, updated_at, ...restRawNote } = rawNote;
-
   return {
-    ...restRawNote,
-    date: new Date(date),
-    createdAt: new Date(created_at),
-    updatedAt: new Date(updated_at),
+    ...rawNote,
+    date: new Date(rawNote.date),
+    created_at: new Date(rawNote.created_at),
+    updated_at: new Date(rawNote.updated_at),
   };
 }
 
@@ -79,11 +77,14 @@ export function getNote(db: SQLiteDatabase, id: number): NoteEntity | null {
   return rawNote ? prepareNote(rawNote) : null;
 }
 
-export function getNotes(db: SQLiteDatabase): NoteEntity[] {
-  const rawNotes: RawNoteEntity[] = db.getAllSync('SELECT * FROM notes;');
+export function getNotes(db: SQLiteDatabase, sortingField: SortingField, sortingDirection: SortingDirection): NoteEntity[] {
+  const rawNotes: RawNoteEntity[] = db.getAllSync(`SELECT * FROM notes ORDER BY ${sortingField} ${sortingDirection};`);
 
   return rawNotes.map(prepareNote);
 }
+
+export type SortingField = 'date' | 'created_at' | 'updated_at';
+export type SortingDirection = 'ASC' | 'DESC';
 
 type RawNoteEntity = {
   id: number;
@@ -99,6 +100,6 @@ export type NoteEntity = {
   title: string;
   content: string;
   date: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 };
