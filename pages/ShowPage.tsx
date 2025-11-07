@@ -64,7 +64,7 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
       <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom, paddingBottom: insets.bottom }]}>
         <View style={styles.noteContainer}>
           <Text style={styles.text}>{note.content ? `${note.title}: ${note.content}` : note.title}</Text>
-          <Text style={styles.text}>Дата: {note.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+          <Text style={styles.text}>Дата: {note.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
         </View>
         <View style={styles.sectionContainer}>
           <Text style={styles.text}>Заметка создана: {note.createdAt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>

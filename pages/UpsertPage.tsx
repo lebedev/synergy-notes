@@ -28,7 +28,7 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
 
   const [title, setTitle] = useState<string>(note?.title ?? '');
   const [content, setContent] = useState<string>(note?.content ?? '');
-  const [shouldShowDatePicker, setShouldShowDatePicker] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState<'date' | 'time' | null>(null);
   const [date, setDate] = useState<Date>(note?.date ?? new Date());
 
   const saveNote = async () => {
@@ -86,17 +86,24 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeading}>Дата:</Text>
           <View style={styles.flexRow}>
-            <Text>{date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} </Text>
-            <TouchableOpacity onPress={() => setShouldShowDatePicker(true)}>
-              <Text style={{ color: 'dodgerblue' }}>Изменить</Text>
+            <Text>{date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (</Text>
+            <TouchableOpacity onPress={() => setDatePickerMode('date')}>
+              <Text style={styles.pressable}>Изменить 📅</Text>
             </TouchableOpacity>
+            <Text>) (</Text>
+            <TouchableOpacity onPress={() => setDatePickerMode('time')}>
+              <Text style={styles.pressable}>Изменить 🕒</Text>
+            </TouchableOpacity>
+            <Text>)</Text>
 
-            {shouldShowDatePicker ? (
+            {datePickerMode ? (
               <DateTimePicker
+                mode={datePickerMode}
                 value={date}
+                is24Hour
                 onChange={(event, selectedDate) => {
                   setDate(selectedDate);
-                  setShouldShowDatePicker(false);
+                  setDatePickerMode(null);
                 }}
               />
             ) : null}
@@ -150,5 +157,8 @@ const styles = StyleSheet.create({
   },
   flexRow: {
     flexDirection: 'row',
+  },
+  pressable: {
+    color: 'dodgerblue',
   },
 });
