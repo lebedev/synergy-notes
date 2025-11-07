@@ -17,7 +17,7 @@ export async function updateNoteAsync(
   content: string,
   date: Date,
 ): Promise<void> {
-  await db.runAsync('UPDATE notes SET title = ?, content = ?, date = ? WHERE id = ?;', title, content, date.toISOString(), id);
+  await db.runAsync('UPDATE notes SET title = ?, content = ?, date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;', title, content, date.toISOString(), id);
 }
 
 export async function deleteNoteAsync(db: SQLiteDatabase, id: number): Promise<void> {
@@ -25,7 +25,7 @@ export async function deleteNoteAsync(db: SQLiteDatabase, id: number): Promise<v
 }
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
-  const DATABASE_VERSION = 2;
+  const DATABASE_VERSION = 3;
   let { user_version: currentDbVersion } = await db.getFirstAsync<{
     user_version: number;
   }>('PRAGMA user_version');
@@ -46,16 +46,41 @@ DROP TABLE IF EXISTS items;
 `);
     currentDbVersion = 2;
   }
+  if (currentDbVersion === 2) {
+    await db.runAsync(
+      'UPDATE notes SET date = ? WHERE date IS NULL;',
+      (new Date()).toISOString()
+    );
+    currentDbVersion = 3;
+  }
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
 export function getNote(db: SQLiteDatabase, id: number): NoteEntity | null {
-  return db.getFirstSync('SELECT * FROM notes WHERE id = ?', id);
+  const rawNote: RawNoteEntity = db.getFirstSync('SELECT * FROM notes WHERE id = ?', id);
+
+  return {
+    ...rawNote,
+    date: new Date(rawNote.date),
+    createdAt: new Date(rawNote.created_at),
+    updatedAt: new Date(rawNote.updated_at),
+  };
 }
+
+type RawNoteEntity = {
+  id: number;
+  title: string;
+  content: string;
+  date: string;
+  created_at: string;
+  updated_at: string;
+};
 
 export type NoteEntity = {
   id: number;
   title: string;
   content: string;
-  date: number;
+  date: Date;
+  createdAt: Date;
+  updatedAt: Date;
 };

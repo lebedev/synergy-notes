@@ -3,7 +3,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -22,7 +21,7 @@ type Props = {
 export function ShowPage({ selectedId, goToList, startEditing }: Props) {
   const insets = useSafeAreaInsets();
   const db = useSQLiteContext();
-  const [note, setNote] = useState<NoteEntity | null>(() => getNote(db, selectedId));
+  const [note] = useState<NoteEntity | null>(() => getNote(db, selectedId));
 
   if (!note) {
     goToList();
@@ -62,47 +61,19 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
       </View>
       <Text style={[styles.heading, styles.title]}>{note.title}</Text>
 
-      <View style={styles.flexRow}>
-        <TextInput
-          onChangeText={() => {}}
-          onSubmitEditing={() => {}}
-          placeholder="what do you need to do?"
-          style={styles.input}
-          value={"azaza"}
-        />
-      </View>
-
-      <ScrollView style={styles.listArea}>
+      <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom, paddingBottom: insets.bottom }]}>
+        <View style={styles.noteContainer}>
+          <Text style={styles.text}>{note.content}</Text>
+          <Text style={styles.text}>Дата: {note.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+        </View>
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeading}>Todo</Text>
-            <Note
-              key={note.id}
-              note={note}
-              onPressItem={() => {}}
-            />
+          <Text style={styles.text}>Заметка создана: {note.createdAt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+          {note.createdAt.getDate() !== note.updatedAt.getDate() ? (
+            <Text style={styles.text}>Заметка обновлена: {note.updatedAt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+          ) : null}
         </View>
       </ScrollView>
     </View>
-  );
-}
-
-function Note({
-  note,
-  onPressItem,
-}: {
-  note: NoteEntity;
-  onPressItem: (id) => void | Promise<void>;
-}) {
-  const { id, title, content } = note;
-  return (
-    <TouchableOpacity
-      onPress={() => onPressItem && onPressItem(id)}
-      style={[styles.item, title && styles.itemDone]}
-    >
-      <Text style={[styles.itemText, content && styles.itemTextDone]}>
-        {content}
-      </Text>
-    </TouchableOpacity>
   );
 }
 
@@ -123,44 +94,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingTop: 8,
   },
-  flexRow: {
-    flexDirection: 'row',
-  },
-  input: {
-    borderColor: '#4630eb',
-    borderRadius: 4,
-    borderWidth: 1,
-    flex: 1,
-    height: 48,
-    margin: 16,
-    padding: 8,
-  },
   listArea: {
     backgroundColor: '#f0f0f0',
     flex: 1,
+    marginTop: 16,
     paddingTop: 16,
+  },
+  noteContainer: {
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: 'gray',
+    backgroundColor: '#fff',
+    paddingHorizontal: 8,
+    marginHorizontal: 8,
   },
   sectionContainer: {
     marginBottom: 16,
     marginHorizontal: 16,
   },
-  sectionHeading: {
+  text: {
     fontSize: 18,
     marginBottom: 8,
-  },
-  item: {
-    backgroundColor: '#fff',
-    borderColor: '#000',
-    borderWidth: 1,
-    padding: 8,
-  },
-  itemDone: {
-    backgroundColor: '#1c9963',
-  },
-  itemText: {
-    color: '#000',
-  },
-  itemTextDone: {
-    color: '#fff',
   },
 });
