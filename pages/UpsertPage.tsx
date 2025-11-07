@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,11 +28,18 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
   const [note] = useState<NoteEntity | null>(() => getNote(db, selectedId));
 
   const [title, setTitle] = useState<string>(note?.title ?? '');
+  const initialTitle = useRef(title);
   const [content, setContent] = useState<string>(note?.content ?? '');
+  const initialContent = useRef(content);
   const [datePickerMode, setDatePickerMode] = useState<'date' | 'time' | null>(null);
   const [date, setDate] = useState<Date>(note?.date ?? new Date());
+  const initialDate = useRef(date);
 
   const saveNote = async () => {
+    if (!title) {
+      return Alert.alert('Заголовок не может быть пустым!', 'Пожалуйста, заполните заголовок');
+    }
+
     if (selectedId) {
       await updateNoteAsync(db, selectedId, title, content, date);
     } else {
@@ -40,6 +48,32 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
     }
     stopEditing();
   };
+
+  const onBackButtonPress = () => {
+    if (initialTitle.current !== title || initialContent.current !== content || initialDate.current !== date) {
+      Alert.alert('Есть несохраненные данные!', 'Выйти без сохранения?', [
+        {
+          text: 'Отмена',
+          style: 'cancel',
+        },
+        {
+          text: 'Выйти без сохранения',
+          style: 'destructive',
+          onPress: goToList,
+        },
+        {
+          text: 'Сохранить и выйти',
+          style: 'default',
+          onPress: async () => {
+            await saveNote();
+            goToList();
+          },
+        },
+      ])
+    } else {
+      goToList();
+    }
+  }
 
   return (
     <View style={[
@@ -52,7 +86,7 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
       }
     ]}>
       <View style={[styles.titleButton, { top: insets.top, left: insets.left + 4 }]}>
-        <TouchableOpacity onPress={goToList}>
+        <TouchableOpacity onPress={onBackButtonPress}>
           <Text style={styles.heading}>←</Text>
         </TouchableOpacity>
       </View>
