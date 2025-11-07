@@ -3,6 +3,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -11,6 +12,8 @@ import {
 } from 'expo-sqlite';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getNotes, NoteEntity, SortingDirection, SortingField } from '../helpers/db';
+import { Note } from '../components/Note';
+import { prettyDateTime } from '../helpers/date';
 
 type Props = {
   selectId: (id: number) => void;
@@ -30,6 +33,9 @@ export function IndexPage({ selectId, createNote }: Props) {
   const [currentSortingField, setCurrentSortingField] = useState<SortingField>('created_at');
   const [sortingDirection, setSortingDirection] = useState<SortingDirection>('DESC');
   const [notes, setNotes] = useState<NoteEntity[] | null>(null);
+  const [filteredNotes, setFilteredNotes] = useState<NoteEntity[]>([]);
+
+  const [searchText, setSearchText] = useState('');
 
   const changeSorting = useCallback((sortingField: SortingField) => {
     setCurrentSortingField(sortingField);
@@ -45,8 +51,24 @@ export function IndexPage({ selectId, createNote }: Props) {
   }, [currentSortingField, sortingDirection]);
 
   useEffect(() => {
-    setNotes(getNotes(db, currentSortingField, sortingDirection));
+    const nextNotes = getNotes(db, currentSortingField, sortingDirection);
+    setNotes(nextNotes);
+    setFilteredNotes(nextNotes);
   }, [db, currentSortingField, sortingDirection]);
+
+  useEffect(() => {
+    if (!notes) {
+      return;
+    }
+
+    const searchParts = searchText.toLowerCase().split(' ');
+
+    setFilteredNotes(searchText ? notes.filter(({ title, content, date }) => {
+      const [titleLowercase, contentLowercase] = [title.toLowerCase(), content.toLowerCase()];
+
+      return searchParts.every((searchPart) => titleLowercase.includes(searchPart) || contentLowercase.includes(searchPart) || prettyDateTime(date).includes(searchPart));
+    }) : notes);
+  }, [notes, searchText]);
 
   return (
     <View style={[
@@ -73,143 +95,55 @@ export function IndexPage({ selectId, createNote }: Props) {
               <Text style={styles.sectionHeading}>Пока нет заметок! Создайте новую, нажав на + в углу.</Text>
             ) : (
               <>
-                <View style={styles.flexRow}>
-                  <Text style={styles.sectionHeading}>Сортировка: </Text>
-
-                  {SORTING_FIELDS.map((sortingField, index) => (
-                    <Fragment key={sortingField}>
-                      <TouchableOpacity
-                        onPress={() => changeSorting(sortingField)}
-                      >
-                        <Text style={styles.sectionHeading}>
-                          <Text style={currentSortingField === sortingField && styles.bold}>
-                            {SORTING_FIELDS_LABELS[sortingField]}
-                            {currentSortingField === sortingField ? (
-                              <Text>{sortingDirection === 'DESC' ? ' ↓' : ' ↑'}</Text>
-                            ) : null}
-                          </Text>
-                        </Text>
-                      </TouchableOpacity>
-                      {index !== SORTING_FIELDS.length - 1 ? (
-                        <Text style={styles.sectionHeading}>, </Text>
-                      ) : null}
-                    </Fragment>
-                  ))}
-                </View>
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onPressItem={selectId}
-                  />
-                ))}
-                <Note
-                  key={notes[0].id}
-                  note={{
-                    ...notes[0],
-                    title: 'LAST'
-                  }}
-                  onPressItem={selectId}
+                <TextInput
+                  onChangeText={setSearchText}
+                  placeholder="Введите текст для поиска..."
+                  style={styles.input}
+                  value={searchText}
                 />
+                {filteredNotes.length === 0 ? (
+                  <Text style={styles.sectionHeading}>Ничего не найдено! Попробуйте другой поисковый запрос!</Text>
+                ) : (
+                  <>
+                    <View style={styles.flexRow}>
+                      <Text style={styles.sectionHeading}>Сортировка: </Text>
+
+                      {SORTING_FIELDS.map((sortingField, index) => (
+                        <Fragment key={sortingField}>
+                          <TouchableOpacity
+                            onPress={() => changeSorting(sortingField)}
+                          >
+                            <Text style={styles.sectionHeading}>
+                              <Text style={currentSortingField === sortingField && styles.bold}>
+                                {SORTING_FIELDS_LABELS[sortingField]}
+                                {currentSortingField === sortingField ? (
+                                  <Text>{sortingDirection === 'DESC' ? ' ↓' : ' ↑'}</Text>
+                                ) : null}
+                              </Text>
+                            </Text>
+                          </TouchableOpacity>
+                          {index !== SORTING_FIELDS.length - 1 ? (
+                            <Text style={styles.sectionHeading}>, </Text>
+                          ) : null}
+                        </Fragment>
+                      ))}
+                    </View>
+                    {filteredNotes.map((note) => (
+                      <TouchableOpacity
+                        key={note.id}
+                        onPress={() => selectId(note.id)}
+                      >
+                        <Note note={note} />
+                      </TouchableOpacity>
+                    ))}
+                  </>
+                )}
               </>
             )}
           </View>
         ) : null}
       </ScrollView>
     </View>
-  );
-}
-
-function Note({
-  note,
-  onPressItem,
-}: {
-  note: NoteEntity;
-  onPressItem: (id) => void | Promise<void>;
-}) {
-  const { id, title, content, date } = note;
-  return (
-    <TouchableOpacity
-      onPress={() => onPressItem && onPressItem(id)}
-      style={[styles.item, title && styles.itemDone]}
-    >
-      <Text style={[styles.itemText, content && styles.itemTextDone]}>
-        {title}
-      </Text>
-      <Text style={[styles.itemText, content && styles.itemTextDone]}>
-        {date.toISOString()}
-      </Text>
-    </TouchableOpacity>
   );
 }
 
@@ -239,11 +173,12 @@ const styles = StyleSheet.create({
   },
   input: {
     borderColor: '#4630eb',
+    backgroundColor: '#fff',
     borderRadius: 4,
     borderWidth: 1,
     flex: 1,
     height: 48,
-    margin: 16,
+    marginBottom: 8,
     padding: 8,
   },
   listArea: {
@@ -262,20 +197,5 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: 'bold',
-  },
-  item: {
-    backgroundColor: '#fff',
-    borderColor: '#000',
-    borderWidth: 1,
-    padding: 8,
-  },
-  itemDone: {
-    backgroundColor: '#1c9963',
-  },
-  itemText: {
-    color: '#000',
-  },
-  itemTextDone: {
-    color: '#fff',
   },
 });

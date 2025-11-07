@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { addNoteAsync, getNote, NoteEntity, updateNoteAsync } from '../helpers/db';
+import { prettyDateTime } from '../helpers/date';
 
 type Props = {
   selectedId: number | null;
@@ -120,7 +121,7 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeading}>Дата:</Text>
           <View style={styles.flexRow}>
-            <Text>{date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (</Text>
+            <Text>{prettyDateTime(date)} (</Text>
             <TouchableOpacity onPress={() => setDatePickerMode('date')}>
               <Text style={styles.pressable}>Изменить 📅</Text>
             </TouchableOpacity>

@@ -12,6 +12,8 @@ import {
 } from 'expo-sqlite';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { deleteNoteAsync, getNote, NoteEntity } from '../helpers/db';
+import { prettyDate } from '../helpers/date';
+import { Note } from '../components/Note';
 
 type Props = {
   selectedId: number;
@@ -79,14 +81,11 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
       <Text style={[styles.heading, styles.title]}>{note.title}</Text>
 
       <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom, paddingBottom: insets.bottom }]}>
-        <View style={styles.noteContainer}>
-          <Text style={styles.text}>{note.content ? `${note.title}: ${note.content}` : note.title}</Text>
-          <Text style={styles.text}>Дата: {note.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
-        </View>
+        <Note note={note} />
         <View style={styles.sectionContainer}>
-          <Text style={styles.text}>Заметка создана: {note.created_at.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+          <Text style={styles.text}>Заметка создана: {prettyDate(note.created_at)}</Text>
           {note.created_at.getTime() !== note.updated_at.getTime() ? (
-            <Text style={styles.text}>Заметка обновлена: {note.updated_at.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+            <Text style={styles.text}>Заметка обновлена: {prettyDate(note.updated_at)}</Text>
           ) : null}
         </View>
       </ScrollView>
@@ -115,21 +114,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     flex: 1,
     marginTop: 16,
-    paddingTop: 8,
-  },
-  noteContainer: {
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: 'gray',
-    backgroundColor: '#fff',
     paddingHorizontal: 8,
-    paddingTop: 4,
-    marginHorizontal: 8,
-    marginBottom: 8,
+    paddingTop: 8,
   },
   sectionContainer: {
     marginBottom: 16,
-    marginHorizontal: 16,
+    marginHorizontal: 8,
   },
   text: {
     fontSize: 18,
