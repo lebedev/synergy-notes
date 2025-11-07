@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -29,9 +30,25 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
     return null;
   }
 
-  const remove = async () => {
-    await deleteNoteAsync(db, selectedId);
-    goToList();
+  const remove = () => {
+    Alert.alert(
+      'Удалить заметку?',
+      undefined,
+        [
+          {
+            text: 'Да',
+            style: 'destructive',
+            onPress: async () => {
+              await deleteNoteAsync(db, selectedId);
+              goToList();
+            },
+          },
+          {
+            text: 'Отмена',
+            style: 'cancel',
+          },
+        ]
+    );
   }
 
   return (
