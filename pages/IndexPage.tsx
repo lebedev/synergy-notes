@@ -9,6 +9,7 @@ import {
 import {
   useSQLiteContext,
 } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NoteEntity } from '../helpers/db';
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function IndexPage({ selectId, createNote }: Props) {
+  const insets = useSafeAreaInsets();
   const db = useSQLiteContext();
   const [notes, setNotes] = useState<NoteEntity[]>([]);
 
@@ -38,7 +40,15 @@ export function IndexPage({ selectId, createNote }: Props) {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={[
+      styles.container,
+      {
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right
+      }
+    ]}>
       <Text style={styles.heading}>Синергичные заметки</Text>
       <TouchableOpacity
         style={styles.addButton}
@@ -85,14 +95,13 @@ function Note({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
     flex: 1,
-    paddingTop: 64,
   },
   heading: {
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
+    paddingVertical: 8,
   },
   addButton: {
     borderWidth: 1,

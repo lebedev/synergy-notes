@@ -11,6 +11,7 @@ import {
   useSQLiteContext,
 } from 'expo-sqlite';
 import { deleteNoteAsync, getNote, NoteEntity } from '../helpers/db';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   selectedId: number;
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export function ShowPage({ selectedId, goToList, startEditing }: Props) {
+  const insets = useSafeAreaInsets();
   const db = useSQLiteContext();
   const [note, setNote] = useState<NoteEntity | null>(() => getNote(db, selectedId));
 
@@ -34,38 +36,31 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={goToList}
-        style={styles.backButton}
-      >
-        <Text
-          style={styles.heading}
-        >
-          ←
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={startEditing}
-        style={styles.editButton}
-      >
-        <Text
-          style={styles.heading}
-        >
-          ✏️
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={remove}
-        style={styles.removeButton}
-      >
-        <Text
-          style={styles.heading}
-        >
-          🗑️
-        </Text>
-      </TouchableOpacity>
-      <Text style={styles.heading}>{note.title}</Text>
+    <View style={[
+      styles.container,
+      {
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right
+      }
+    ]}>
+      <View style={[styles.titleButton, { top: insets.top, left: insets.left + 4 }]}>
+        <TouchableOpacity onPress={goToList}>
+          <Text style={styles.heading}>←</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={[styles.titleButton, { top: insets.top, right: insets.right + 36 }]}>
+        <TouchableOpacity onPress={startEditing}>
+          <Text style={styles.heading}>✏️</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={[styles.titleButton, { top: insets.top, right: insets.right + 4 }]}>
+        <TouchableOpacity onPress={remove}>
+          <Text style={styles.heading}>🗑️</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={[styles.heading, styles.title]}>{note.title}</Text>
 
       <View style={styles.flexRow}>
         <TextInput
@@ -113,35 +108,20 @@ function Note({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
     flex: 1,
-    paddingTop: 64,
   },
-  backButton: {
+  titleButton: {
     position: 'absolute',
-    left: 4,
-    top: 58,
-    padding: 8,
-    zIndex: 1,
-  },
-  editButton: {
-    position: 'absolute',
-    right: 36,
-    top: 58,
-    padding: 8,
-    zIndex: 1,
-  },
-  removeButton: {
-    position: 'absolute',
-    right: 4,
-    top: 58,
     padding: 8,
     zIndex: 1,
   },
   heading: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  title: {
     textAlign: 'center',
+    paddingTop: 8,
   },
   flexRow: {
     flexDirection: 'row',

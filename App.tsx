@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   SQLiteProvider,
 } from 'expo-sqlite';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { migrateDbIfNeeded } from './helpers/db';
 import { IndexPage } from './pages/IndexPage';
 import { ShowPage } from './pages/ShowPage';
@@ -10,7 +11,9 @@ import { UpsertPage } from './pages/UpsertPage';
 export default function App() {
   return (
     <SQLiteProvider databaseName="db.db" onInit={migrateDbIfNeeded}>
-      <Router />
+      <SafeAreaProvider>
+        <Router />
+      </SafeAreaProvider>
     </SQLiteProvider>
   );
 }

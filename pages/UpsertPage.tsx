@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -10,6 +10,7 @@ import {
 import {
   useSQLiteContext,
 } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { addNoteAsync, getNote, NoteEntity, updateNoteAsync } from '../helpers/db';
 
 type Props = {
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Props) {
+  const insets = useSafeAreaInsets();
   const db = useSQLiteContext();
   const [note, setNote] = useState<NoteEntity | null>(() => getNote(db, selectedId));
 
@@ -37,20 +39,27 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={goToList}
-        style={styles.backButton}
-      >
-        <Text style={styles.heading}>←</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={saveNote}
-        style={styles.saveButton}
-      >
-        <Text style={styles.heading}>💾</Text>
-      </TouchableOpacity>
-      <Text style={styles.heading}>{title}</Text>
+    <View style={[
+      styles.container,
+      {
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right
+      }
+    ]}>
+      <View style={[styles.titleButton, { top: insets.top, left: insets.left + 4 }]}>
+        <TouchableOpacity onPress={goToList}>
+          <Text style={styles.heading}>←</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={[styles.titleButton, { top: insets.top, right: insets.right + 4 }]}>
+        <TouchableOpacity onPress={saveNote}>
+          <Text style={styles.heading}>💾</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text style={[styles.heading, styles.title]}>{title}</Text>
 
       <ScrollView style={styles.listArea}>
         <View style={styles.sectionContainer}>
@@ -82,28 +91,20 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
     flex: 1,
-    paddingTop: 64,
   },
-  backButton: {
+  titleButton: {
     position: 'absolute',
-    left: 4,
-    top: 58,
-    padding: 8,
-    zIndex: 1,
-  },
-  saveButton: {
-    position: 'absolute',
-    right: 4,
-    top: 58,
     padding: 8,
     zIndex: 1,
   },
   heading: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  title: {
     textAlign: 'center',
+    paddingTop: 8,
   },
   input: {
     borderColor: '#4630eb',
