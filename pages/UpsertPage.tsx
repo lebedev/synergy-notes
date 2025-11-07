@@ -66,7 +66,7 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
 
       <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom, paddingBottom: insets.bottom }]}>
         <View style={styles.sectionContainer}>
-          <Text>Заголовок:</Text>
+          <Text style={styles.sectionHeading}>Заголовок:</Text>
           <TextInput
             onChangeText={setTitle}
             placeholder="Заголовок..."
@@ -75,7 +75,7 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
           />
         </View>
         <View style={styles.sectionContainer}>
-          <Text>Текст:</Text>
+          <Text style={styles.sectionHeading}>Текст:</Text>
           <TextInput
             onChangeText={setContent}
             placeholder="Текст..."
@@ -84,23 +84,24 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
           />
         </View>
         <View style={styles.sectionContainer}>
-        <View style={{ flexDirection: 'row' }}>
-          <Text>Дата: </Text>
-          <TouchableOpacity onPress={() => setShouldShowDatePicker(true)}>
-            <Text style={{ color: 'dodgerblue' }}>Изменить</Text>
-          </TouchableOpacity>
-        </View>
-          <Text>{date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} </Text>
+          <Text style={styles.sectionHeading}>Дата:</Text>
+          <View style={{ flexDirection: 'row' }}>
+            <Text>{date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} </Text>
+            <TouchableOpacity onPress={() => setShouldShowDatePicker(true)}>
+              <Text style={{ color: 'dodgerblue' }}>Изменить</Text>
+            </TouchableOpacity>
 
-          {shouldShowDatePicker ? (
-            <DateTimePicker
-              value={date}
-              onChange={(event, selectedDate) => {
-                setDate(selectedDate);
-                setShouldShowDatePicker(false);
-              }}
-            />
-          ) : null}
+            {shouldShowDatePicker ? (
+              <DateTimePicker
+                value={date}
+                onChange={(event, selectedDate) => {
+                  setDate(selectedDate);
+                  setShouldShowDatePicker(false);
+                }}
+              />
+            ) : null}
+          </View>
+
         </View>
       </ScrollView>
     </View>
@@ -146,20 +147,5 @@ const styles = StyleSheet.create({
   sectionHeading: {
     fontSize: 18,
     marginBottom: 8,
-  },
-  item: {
-    backgroundColor: '#fff',
-    borderColor: '#000',
-    borderWidth: 1,
-    padding: 8,
-  },
-  itemDone: {
-    backgroundColor: '#1c9963',
-  },
-  itemText: {
-    color: '#000',
-  },
-  itemTextDone: {
-    color: '#fff',
   },
 });
