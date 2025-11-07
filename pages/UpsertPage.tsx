@@ -64,25 +64,21 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
       <ScrollView style={styles.listArea}>
         <View style={styles.sectionContainer}>
           <Text>Заголовок:</Text>
-          <View>
-            <TextInput
-              onChangeText={setTitle}
-              placeholder="Заголовок..."
-              style={styles.input}
-              value={title}
-            />
-          </View>
+          <TextInput
+            onChangeText={setTitle}
+            placeholder="Заголовок..."
+            style={styles.input}
+            value={title}
+          />
         </View>
         <View style={styles.sectionContainer}>
           <Text>Текст:</Text>
-          <View>
-            <TextInput
-              onChangeText={setContent}
-              placeholder="Текст..."
-              style={styles.input}
-              value={content}
-            />
-          </View>
+          <TextInput
+            onChangeText={setContent}
+            placeholder="Текст..."
+            style={styles.input}
+            value={content}
+          />
         </View>
       </ScrollView>
     </View>
