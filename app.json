@@ -1,7 +1,15 @@
 {
   "plugins": [
-    "expo-sqlite"
+    "expo-sqlite",
+    [
+      "expo-splash-screen",
+      {
+        "image": "./assets/images/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    ]
   ],
   "name": "synergy-notes",
-  "slug": "synergy-notes"
+  "slug": "synergy-notes",
+  "icon": "./assets/images/icon.png"
 }
