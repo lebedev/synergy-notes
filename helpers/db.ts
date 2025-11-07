@@ -15,8 +15,9 @@ export async function updateNoteAsync(
   id: number,
   title: string,
   content: string,
+  date: Date,
 ): Promise<void> {
-  await db.runAsync('UPDATE notes SET title = ?, content = ? WHERE id = ?;', title, content, id);
+  await db.runAsync('UPDATE notes SET title = ?, content = ?, date = ? WHERE id = ?;', title, content, date.toISOString(), id);
 }
 
 export async function deleteNoteAsync(db: SQLiteDatabase, id: number): Promise<void> {
@@ -56,4 +57,5 @@ export type NoteEntity = {
   id: number;
   title: string;
   content: string;
+  date: number;
 };

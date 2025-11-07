@@ -11,6 +11,7 @@ import {
   useSQLiteContext,
 } from 'expo-sqlite';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { addNoteAsync, getNote, NoteEntity, updateNoteAsync } from '../helpers/db';
 
 type Props = {
@@ -23,14 +24,16 @@ type Props = {
 export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Props) {
   const insets = useSafeAreaInsets();
   const db = useSQLiteContext();
-  const [note, setNote] = useState<NoteEntity | null>(() => getNote(db, selectedId));
+  const [note] = useState<NoteEntity | null>(() => getNote(db, selectedId));
 
   const [title, setTitle] = useState<string>(note?.title ?? '');
   const [content, setContent] = useState<string>(note?.content ?? '');
+  const [shouldShowDatePicker, setShouldShowDatePicker] = useState(false);
+  const [date, setDate] = useState<Date>(new Date(note?.date ?? Date.now()));
 
   const saveNote = async () => {
     if (selectedId) {
-      await updateNoteAsync(db, selectedId, title, content);
+      await updateNoteAsync(db, selectedId, title, content, date);
     } else {
       const createdNoteId = await addNoteAsync(db, title, content);
       selectId(createdNoteId);
@@ -61,7 +64,7 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
 
       <Text style={[styles.heading, styles.title]}>{title}</Text>
 
-      <ScrollView style={styles.listArea}>
+      <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom, paddingBottom: insets.bottom }]}>
         <View style={styles.sectionContainer}>
           <Text>Заголовок:</Text>
           <TextInput
@@ -79,6 +82,25 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
             style={styles.input}
             value={content}
           />
+        </View>
+        <View style={styles.sectionContainer}>
+        <View style={{ flexDirection: 'row' }}>
+          <Text>Дата: </Text>
+          <TouchableOpacity onPress={() => setShouldShowDatePicker(true)}>
+            <Text style={{ color: 'dodgerblue' }}>Изменить</Text>
+          </TouchableOpacity>
+        </View>
+          <Text>{date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} </Text>
+
+          {shouldShowDatePicker ? (
+            <DateTimePicker
+              value={date}
+              onChange={(event, selectedDate) => {
+                setDate(selectedDate);
+                setShouldShowDatePicker(false);
+              }}
+            />
+          ) : null}
         </View>
       </ScrollView>
     </View>
