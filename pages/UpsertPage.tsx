@@ -29,13 +29,13 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
   const [title, setTitle] = useState<string>(note?.title ?? '');
   const [content, setContent] = useState<string>(note?.content ?? '');
   const [shouldShowDatePicker, setShouldShowDatePicker] = useState(false);
-  const [date, setDate] = useState<Date>(new Date(note?.date ?? Date.now()));
+  const [date, setDate] = useState<Date>(note?.date ?? new Date());
 
   const saveNote = async () => {
     if (selectedId) {
       await updateNoteAsync(db, selectedId, title, content, date);
     } else {
-      const createdNoteId = await addNoteAsync(db, title, content);
+      const createdNoteId = await addNoteAsync(db, title, content, date);
       selectId(createdNoteId);
     }
     stopEditing();
@@ -85,7 +85,7 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
         </View>
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeading}>Дата:</Text>
-          <View style={{ flexDirection: 'row' }}>
+          <View style={styles.flexRow}>
             <Text>{date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} </Text>
             <TouchableOpacity onPress={() => setShouldShowDatePicker(true)}>
               <Text style={{ color: 'dodgerblue' }}>Изменить</Text>
@@ -147,5 +147,8 @@ const styles = StyleSheet.create({
   sectionHeading: {
     fontSize: 18,
     marginBottom: 8,
+  },
+  flexRow: {
+    flexDirection: 'row',
   },
 });

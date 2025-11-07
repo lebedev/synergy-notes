@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -10,34 +10,46 @@ import {
   useSQLiteContext,
 } from 'expo-sqlite';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { NoteEntity } from '../helpers/db';
+import { getNotes, NoteEntity } from '../helpers/db';
 
 type Props = {
   selectId: (id: number) => void;
   createNote: () => void;
 };
 
+const SORTING_FIELDS = ['date', 'createdAt', 'updatedAt'];
+type SortingField = typeof SORTING_FIELDS[number];
+const SORTING_FIELDS_LABELS: Record<SortingField, string> = {
+  date: 'дата',
+  createdAt: 'дата создания',
+  updatedAt: 'дата обновления',
+};
+
 export function IndexPage({ selectId, createNote }: Props) {
   const insets = useSafeAreaInsets();
   const db = useSQLiteContext();
-  const [notes, setNotes] = useState<NoteEntity[]>([]);
+  const [notes, setNotes] = useState<NoteEntity[]>(() => getNotes(db));
+  const [currentSortingField, setCurrentSortingField] = useState<SortingField>('createdAt');
+  const [sortingDirection, setSortingDirection] = useState<'asc' | 'desc'>('desc');
 
-  const refetchItems = useCallback(() => {
-    async function refetch() {
-      await db.withExclusiveTransactionAsync(async () => {
-        setNotes(
-          await db.getAllAsync<NoteEntity>(
-            'SELECT * FROM notes'
-          )
-        );
-      });
-    }
-    refetch();
-  }, [db]);
+  const changeSorting = useCallback((sortingField: SortingField) => {
+    setCurrentSortingField(sortingField);
+
+    const nextSortingDirection = (() => {
+      if (currentSortingField === sortingField) {
+        return sortingDirection === 'desc' ? 'asc' : 'desc';
+      } else {
+        return 'desc';
+      }
+    })();
+    setSortingDirection(nextSortingDirection);
+  }, [currentSortingField, sortingDirection]);
 
   useEffect(() => {
-    refetchItems();
-  }, []);
+    setNotes((prevNotes) => [...prevNotes].sort(
+      (noteA, noteB) => (sortingDirection === 'desc' ? 1 : -1) * (noteB[currentSortingField].getTime() - noteA[currentSortingField].getTime()))
+    );
+  }, [currentSortingField, sortingDirection]);
 
   return (
     <View style={[
@@ -57,16 +69,123 @@ export function IndexPage({ selectId, createNote }: Props) {
         <Text style={styles.heading}>+</Text>
       </TouchableOpacity>
 
-      <ScrollView style={styles.listArea}>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeading}>Todo</Text>
-          {notes.map((note) => (
-            <Note
-              key={note.id}
-              note={note}
-              onPressItem={selectId}
-            />
-          ))}
+      <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom }]}>
+        <View style={{ paddingBottom: 2 * insets.bottom }}>
+
+          {notes.length === 0 ? (
+            <Text style={styles.sectionHeading}>Пока нет заметок! Создайте новую, нажав на + в углу.</Text>
+          ) : (
+            <>
+              <View style={styles.flexRow}>
+                <Text style={styles.sectionHeading}>Сортировка: </Text>
+
+                {SORTING_FIELDS.map((sortingField, index) => (
+                  <Fragment key={sortingField}>
+                    <TouchableOpacity
+                      onPress={() => changeSorting(sortingField)}
+                    >
+                      <Text style={styles.sectionHeading}>
+                        <Text style={currentSortingField === sortingField && styles.bold}>
+                          {SORTING_FIELDS_LABELS[sortingField]}
+                          {currentSortingField === sortingField ? (
+                            <Text>{sortingDirection === 'desc' ? ' ↓' : ' ↑'}</Text>
+                          ) : null}
+                        </Text>
+                      </Text>
+                    </TouchableOpacity>
+                    {index !== SORTING_FIELDS.length - 1 ? (
+                      <Text style={styles.sectionHeading}>, </Text>
+                    ) : null}
+                  </Fragment>
+                ))}
+              </View>
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              {notes.map((note) => (
+                <Note
+                  key={note.id}
+                  note={note}
+                  onPressItem={selectId}
+                />
+              ))}
+              <Note
+                key={notes[0].id}
+                note={{
+                  ...notes[0],
+                  title: 'LAST'
+                }}
+                onPressItem={selectId}
+              />
+            </>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -80,7 +199,7 @@ function Note({
   note: NoteEntity;
   onPressItem: (id) => void | Promise<void>;
 }) {
-  const { id, title, content } = note;
+  const { id, title, content, date } = note;
   return (
     <TouchableOpacity
       onPress={() => onPressItem && onPressItem(id)}
@@ -88,6 +207,9 @@ function Note({
     >
       <Text style={[styles.itemText, content && styles.itemTextDone]}>
         {title}
+      </Text>
+      <Text style={[styles.itemText, content && styles.itemTextDone]}>
+        {date.toISOString()}
       </Text>
     </TouchableOpacity>
   );
@@ -130,14 +252,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     flex: 1,
     paddingTop: 16,
-  },
-  sectionContainer: {
-    marginBottom: 16,
-    marginHorizontal: 16,
+    paddingHorizontal: 16,
   },
   sectionHeading: {
     fontSize: 18,
     marginBottom: 8,
+  },
+  flexRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  bold: {
+    fontWeight: 'bold',
   },
   item: {
     backgroundColor: '#fff',

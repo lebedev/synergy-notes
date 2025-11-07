@@ -1,10 +1,16 @@
 import { SQLiteDatabase } from 'expo-sqlite';
 
-export async function addNoteAsync(db: SQLiteDatabase, title: string, content: string): Promise<number> {
+export async function addNoteAsync(
+  db: SQLiteDatabase,
+  title: string,
+  content: string,
+  date: Date,
+): Promise<number> {
   const { lastInsertRowId } = await db.runAsync(
-    'INSERT INTO notes (title, content) VALUES (?, ?);',
+    'INSERT INTO notes (title, content, date) VALUES (?, ?, ?);',
     title,
     content,
+    date.toString(),
   );
 
   return lastInsertRowId;
@@ -56,15 +62,27 @@ DROP TABLE IF EXISTS items;
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
-export function getNote(db: SQLiteDatabase, id: number): NoteEntity | null {
-  const rawNote: RawNoteEntity = db.getFirstSync('SELECT * FROM notes WHERE id = ?', id);
+function prepareNote(rawNote: RawNoteEntity): NoteEntity {
+  const { date, created_at, updated_at, ...restRawNote } = rawNote;
 
   return {
-    ...rawNote,
-    date: new Date(rawNote.date),
-    createdAt: new Date(rawNote.created_at),
-    updatedAt: new Date(rawNote.updated_at),
+    ...restRawNote,
+    date: new Date(date),
+    createdAt: new Date(created_at),
+    updatedAt: new Date(updated_at),
   };
+}
+
+export function getNote(db: SQLiteDatabase, id: number): NoteEntity | null {
+  const rawNote: RawNoteEntity = db.getFirstSync('SELECT * FROM notes WHERE id = ?;', id);
+
+  return rawNote ? prepareNote(rawNote) : null;
+}
+
+export function getNotes(db: SQLiteDatabase): NoteEntity[] {
+  const rawNotes: RawNoteEntity[] = db.getAllSync('SELECT * FROM notes;');
+
+  return rawNotes.map(prepareNote);
 }
 
 type RawNoteEntity = {

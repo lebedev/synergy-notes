@@ -9,8 +9,8 @@ import {
 import {
   useSQLiteContext,
 } from 'expo-sqlite';
-import { deleteNoteAsync, getNote, NoteEntity } from '../helpers/db';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { deleteNoteAsync, getNote, NoteEntity } from '../helpers/db';
 
 type Props = {
   selectedId: number;
@@ -63,12 +63,12 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
 
       <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom, paddingBottom: insets.bottom }]}>
         <View style={styles.noteContainer}>
-          <Text style={styles.text}>{note.content}</Text>
+          <Text style={styles.text}>{note.content ? `${note.title}: ${note.content}` : note.title}</Text>
           <Text style={styles.text}>Дата: {note.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
         </View>
         <View style={styles.sectionContainer}>
           <Text style={styles.text}>Заметка создана: {note.createdAt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
-          {note.createdAt.getDate() !== note.updatedAt.getDate() ? (
+          {note.createdAt.getTime() !== note.updatedAt.getTime() ? (
             <Text style={styles.text}>Заметка обновлена: {note.updatedAt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
           ) : null}
         </View>
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     flex: 1,
     marginTop: 16,
-    paddingTop: 16,
+    paddingTop: 8,
   },
   noteContainer: {
     borderWidth: 1,
@@ -106,7 +106,9 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     backgroundColor: '#fff',
     paddingHorizontal: 8,
+    paddingTop: 4,
     marginHorizontal: 8,
+    marginBottom: 8,
   },
   sectionContainer: {
     marginBottom: 16,
