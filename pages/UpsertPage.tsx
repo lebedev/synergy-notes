@@ -86,16 +86,18 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
         paddingRight: insets.right
       }
     ]}>
-      <View style={[styles.titleButton, { top: insets.top, left: insets.left + 4 }]}>
-        <TouchableOpacity onPress={onBackButtonPress}>
-          <Text style={styles.heading}>←</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={[styles.titleButton, { top: insets.top, right: insets.right + 4 }]}>
-        <TouchableOpacity onPress={saveNote}>
-          <Text style={styles.heading}>💾</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={[styles.titleButton, { top: insets.top, left: insets.left + 4 }]}
+        onPress={onBackButtonPress}
+      >
+        <Text style={styles.heading}>←</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.titleButton, { top: insets.top, right: insets.right + 4 }]}
+        onPress={saveNote}
+      >
+        <Text style={styles.heading}>💾</Text>
+      </TouchableOpacity>
 
       <Text style={[styles.heading, styles.title]}>{title}</Text>
 

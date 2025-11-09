@@ -63,21 +63,24 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
         paddingRight: insets.right
       }
     ]}>
-      <View style={[styles.titleButton, { top: insets.top, left: insets.left + 4 }]}>
-        <TouchableOpacity onPress={goToList}>
-          <Text style={styles.heading}>←</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={[styles.titleButton, { top: insets.top, right: insets.right + 36 }]}>
-        <TouchableOpacity onPress={startEditing}>
-          <Text style={styles.heading}>✏️</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={[styles.titleButton, { top: insets.top, right: insets.right + 4 }]}>
-        <TouchableOpacity onPress={remove}>
-          <Text style={styles.heading}>🗑️</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={[styles.titleButton, { top: insets.top, left: insets.left + 4 }]}
+        onPress={goToList}
+      >
+        <Text style={styles.heading}>←</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.titleButton, { top: insets.top, right: insets.right + 36 }]}
+        onPress={startEditing}
+      >
+        <Text style={styles.heading}>✏️</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.titleButton, { top: insets.top, right: insets.right + 4 }]}
+        onPress={remove}
+      >
+        <Text style={styles.heading}>🗑️</Text>
+      </TouchableOpacity>
       <Text style={[styles.heading, styles.title]}>{note.title}</Text>
 
       <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom, paddingBottom: insets.bottom }]}>
