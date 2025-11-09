@@ -152,24 +152,29 @@ export function IndexPage({ selectId, createNote }: Props) {
 
     const parsedRawNotes: RawNoteEntity[] = json;
 
-    Alert.alert(
-      'Импорт',
-      `Вы собираетесь импортировать заметок: ${parsedRawNotes.length}. Все текущие заметки будут удалены. Продолжить?`,
-      [
-        {
-          style: 'cancel',
-          text: 'Отмена',
-        },
-        {
-          style: 'destructive',
-          text: 'Да',
-          onPress: async () => {
-            await replaceNotesAsync(db, parsedRawNotes);
-            refetchSortedNotes();
+    if (notes.length > 0) {
+      Alert.alert(
+        'Импорт',
+        `Вы собираетесь импортировать заметок: ${parsedRawNotes.length}. Все текущие заметки будут удалены. Продолжить?`,
+        [
+          {
+            style: 'cancel',
+            text: 'Отмена',
           },
-        }
-      ],
-    );
+          {
+            style: 'destructive',
+            text: 'Да',
+            onPress: async () => {
+              await replaceNotesAsync(db, parsedRawNotes);
+              refetchSortedNotes();
+            },
+          }
+        ],
+      );
+    } else {
+      await replaceNotesAsync(db, parsedRawNotes);
+      refetchSortedNotes();
+    }
   };
 
   return (
