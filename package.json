@@ -9,6 +9,7 @@
     "@react-native-community/datetimepicker": "8.4.4",
     "@types/react": "~19.1.10",
     "expo": "^54.0.22",
+    "expo-file-system": "~19.0.17",
     "expo-splash-screen": "^31.0.10",
     "expo-sqlite": "^16.0.9",
     "react": "19.1.0",

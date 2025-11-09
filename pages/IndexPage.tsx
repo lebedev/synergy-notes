@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,7 +12,9 @@ import {
   useSQLiteContext,
 } from 'expo-sqlite';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getNotes, NoteEntity, SortingDirection, SortingField } from '../helpers/db';
+import { File } from 'expo-file-system';
+import { StorageAccessFramework, writeAsStringAsync, EncodingType } from 'expo-file-system/legacy';
+import { getNotes, NoteEntity, RawNoteEntity, replaceNotesAsync, SortingDirection, SortingField } from '../helpers/db';
 import { Note } from '../components/Note';
 import { prettyDateTime } from '../helpers/date';
 import { commonStyles } from '../helpers/commonStyles';
@@ -51,11 +54,15 @@ export function IndexPage({ selectId, createNote }: Props) {
     setSortingDirection(nextSortingDirection);
   }, [currentSortingField, sortingDirection]);
 
-  useEffect(() => {
+  const refetchSortedNotes = useCallback(() => {
     const nextNotes = getNotes(db, currentSortingField, sortingDirection);
     setNotes(nextNotes);
     setFilteredNotes(nextNotes);
   }, [db, currentSortingField, sortingDirection]);
+
+  useEffect(() => {
+    refetchSortedNotes();
+  }, [refetchSortedNotes]);
 
   useEffect(() => {
     if (!notes) {
@@ -71,6 +78,100 @@ export function IndexPage({ selectId, createNote }: Props) {
     }) : notes);
   }, [notes, searchText]);
 
+  const exportToFile = async () => {
+    try {
+      const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+      if (!permissions.granted) {
+        Alert.alert('Операция отменена!', 'Не выбрана папка для сохранения или не выданы права');
+
+        return;
+      }
+
+      const filepath = await StorageAccessFramework.createFileAsync(permissions.directoryUri, 'synergy-notes.json', 'application/json')
+      await writeAsStringAsync(filepath, JSON.stringify(notes, null, 2), { encoding: EncodingType.UTF8 });
+      Alert.alert('Заметки экспортированы', `Количество экспортированных заметок: ${notes.length}`);
+    } catch (error) {
+      Alert.alert('Ошибка!', error.message);
+    }
+  };
+
+  const importFromFile = async () => {
+    const text = await (async () => {
+      try {
+        const file = await (async () => {
+          const result = await File.pickFileAsync(undefined, 'application/json');
+
+          return Array.isArray(result) ? result[0] : result;
+        })();
+
+        return file.textSync();
+      } catch (error) {
+        Alert.alert('Ошибка!', 'Выбор файла отменен или нет доступа!');
+      }
+    })();
+
+    if (!text) {
+      return;
+    }
+
+    const json = (() => {
+      try {
+        return JSON.parse(text);
+      } catch (error) {
+        Alert.alert('Ошибка!', 'Содержимое файла не является корректным JSON!');
+      }
+    })();
+
+    if (!json) {
+      return;
+    }
+
+    const isValidJSON = (() => {
+      if (!Array.isArray(json)) {
+        return false;
+      }
+
+      return json.every((item) => {
+        return typeof item.id === 'number'
+          && typeof item.title === 'string'
+          && typeof item.content === 'string'
+          && typeof item.date === 'string'
+          && !Number.isNaN(Date.parse(item.date))
+          && typeof item.created_at === 'string'
+          && !Number.isNaN(Date.parse(item.created_at))
+          && typeof item.updated_at === 'string'
+          && !Number.isNaN(Date.parse(item.updated_at));
+      });
+    })();
+
+    if (!isValidJSON) {
+      Alert.alert('Ошибка!', 'JSON из файла не соответствует схеме приложения!');
+
+      return;
+    }
+
+    const parsedRawNotes: RawNoteEntity[] = json;
+
+    Alert.alert(
+      'Импорт',
+      `Вы собираетесь импортировать заметок: ${parsedRawNotes.length}. Все текущие заметки будут удалены. Продолжить?`,
+      [
+        {
+          style: 'cancel',
+          text: 'Отмена',
+        },
+        {
+          style: 'destructive',
+          text: 'Да',
+          onPress: async () => {
+            await replaceNotesAsync(db, parsedRawNotes);
+            refetchSortedNotes();
+          },
+        }
+      ],
+    );
+  };
+
   return (
     <View style={[
       commonStyles.container,
@@ -82,6 +183,20 @@ export function IndexPage({ selectId, createNote }: Props) {
       }
     ]}>
       <Text style={[commonStyles.heading, commonStyles.title]}>Синергичные заметки</Text>
+      {notes && notes.length > 0 ? (
+        <TouchableOpacity
+          style={[commonStyles.titleButton, { top: insets.top, right: insets.right + 36 }]}
+          onPress={exportToFile}
+        >
+          <Text style={commonStyles.heading}>📤</Text>
+        </TouchableOpacity>
+      ) : null}
+      <TouchableOpacity
+        style={[commonStyles.titleButton, { top: insets.top, right: insets.right + 4 }]}
+        onPress={importFromFile}
+      >
+        <Text style={commonStyles.heading}>📥</Text>
+      </TouchableOpacity>
       <TouchableOpacity
         style={[styles.addButton, { bottom: insets.bottom + 8 }]}
         onPress={createNote}
@@ -93,7 +208,7 @@ export function IndexPage({ selectId, createNote }: Props) {
         {notes ? (
           <View style={{ paddingBottom: 2 * insets.bottom }}>
             {notes.length === 0 ? (
-              <Text style={styles.sectionHeading}>Пока нет заметок! Создайте новую, нажав на + в углу.</Text>
+              <Text style={styles.sectionHeading}>Пока нет заметок! Создайте новую, нажав на + в углу, или экспортируйте из файла!</Text>
             ) : (
               <>
                 <TextInput

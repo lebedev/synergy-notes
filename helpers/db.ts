@@ -30,6 +30,26 @@ export async function deleteNoteAsync(db: SQLiteDatabase, id: number): Promise<v
   await db.runAsync('DELETE FROM notes WHERE id = ?;', id);
 }
 
+export async function replaceNotesAsync(
+  db: SQLiteDatabase,
+  notes: RawNoteEntity[],
+): Promise<void> {
+  await db.withExclusiveTransactionAsync(async () => {
+    await db.runAsync('DELETE FROM notes;');
+    for (const note of notes) {
+      await db.runAsync(
+        'INSERT INTO notes (id, title, content, date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?);',
+        note.id,
+        note.title,
+        note.content,
+        note.date,
+        note.created_at,
+        note.updated_at,
+      );
+    }
+  });
+}
+
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
   const DATABASE_VERSION = 3;
   let { user_version: currentDbVersion } = await db.getFirstAsync<{
@@ -86,7 +106,7 @@ export function getNotes(db: SQLiteDatabase, sortingField: SortingField, sorting
 export type SortingField = 'date' | 'created_at' | 'updated_at';
 export type SortingDirection = 'ASC' | 'DESC';
 
-type RawNoteEntity = {
+export type RawNoteEntity = {
   id: number;
   title: string;
   content: string;
