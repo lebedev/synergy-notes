@@ -98,7 +98,7 @@ export function getNote(db: SQLiteDatabase, id: number): NoteEntity | null {
 }
 
 export function getNotes(db: SQLiteDatabase, sortingField: SortingField, sortingDirection: SortingDirection): NoteEntity[] {
-  const rawNotes: RawNoteEntity[] = db.getAllSync(`SELECT * FROM notes ORDER BY ${sortingField} ${sortingDirection};`);
+  const rawNotes: RawNoteEntity[] = db.getAllSync(`SELECT * FROM notes ORDER BY datetime(${sortingField}) ${sortingDirection};`);
 
   return rawNotes.map(prepareNote);
 }
