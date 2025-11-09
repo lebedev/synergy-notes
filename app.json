@@ -9,7 +9,10 @@
       }
     ]
   ],
-  "name": "synergy-notes",
+  "name": "Заметки",
   "slug": "synergy-notes",
-  "icon": "./assets/images/icon.png"
+  "icon": "./assets/images/icon.png",
+  "android": {
+    "package": "dev.sergelebe.synergynotes"
+  }
 }
