@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { addNoteAsync, getNote, NoteEntity, updateNoteAsync } from '../helpers/db';
 import { prettyDateTime } from '../helpers/date';
+import { commonStyles } from '../helpers/commonStyles';
 
 type Props = {
   selectedId: number | null;
@@ -78,7 +79,7 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
 
   return (
     <View style={[
-      styles.container,
+      commonStyles.container,
       {
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -87,19 +88,19 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
       }
     ]}>
       <TouchableOpacity
-        style={[styles.titleButton, { top: insets.top, left: insets.left + 4 }]}
+        style={[commonStyles.titleButton, { top: insets.top, left: insets.left + 4 }]}
         onPress={onBackButtonPress}
       >
-        <Text style={styles.heading}>←</Text>
+        <Text style={commonStyles.heading}>←</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.titleButton, { top: insets.top, right: insets.right + 4 }]}
+        style={[commonStyles.titleButton, { top: insets.top, right: insets.right + 4 }]}
         onPress={saveNote}
       >
-        <Text style={styles.heading}>💾</Text>
+        <Text style={commonStyles.heading}>💾</Text>
       </TouchableOpacity>
 
-      <Text style={[styles.heading, styles.title]}>{title}</Text>
+      <Text style={[commonStyles.heading, commonStyles.title]}>{title}</Text>
 
       <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom, paddingBottom: insets.bottom }]}>
         <View style={styles.sectionContainer}>
@@ -107,7 +108,7 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
           <TextInput
             onChangeText={setTitle}
             placeholder="Заголовок..."
-            style={styles.input}
+            style={commonStyles.input}
             value={title}
           />
         </View>
@@ -116,7 +117,7 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
           <TextInput
             onChangeText={setContent}
             placeholder="Текст..."
-            style={styles.input}
+            style={commonStyles.input}
             value={content}
           />
         </View>
@@ -153,31 +154,6 @@ export function UpsertPage({ selectedId, selectId, goToList, stopEditing }: Prop
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  titleButton: {
-    position: 'absolute',
-    padding: 8,
-    zIndex: 1,
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  title: {
-    textAlign: 'center',
-    paddingTop: 8,
-  },
-  input: {
-    borderColor: '#4630eb',
-    backgroundColor: '#fff',
-    borderRadius: 4,
-    borderWidth: 1,
-    flex: 1,
-    height: 48,
-    padding: 8,
-  },
   listArea: {
     backgroundColor: '#f0f0f0',
     flex: 1,
@@ -185,7 +161,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   sectionContainer: {
-    marginBottom: 16,
+    marginBottom: 8,
     marginHorizontal: 16,
   },
   sectionHeading: {

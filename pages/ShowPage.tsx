@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { deleteNoteAsync, getNote, NoteEntity } from '../helpers/db';
 import { prettyDate } from '../helpers/date';
 import { Note } from '../components/Note';
+import { commonStyles } from '../helpers/commonStyles';
 
 type Props = {
   selectedId: number;
@@ -55,7 +56,7 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
 
   return (
     <View style={[
-      styles.container,
+      commonStyles.container,
       {
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -64,24 +65,24 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
       }
     ]}>
       <TouchableOpacity
-        style={[styles.titleButton, { top: insets.top, left: insets.left + 4 }]}
+        style={[commonStyles.titleButton, { top: insets.top, left: insets.left + 4 }]}
         onPress={goToList}
       >
-        <Text style={styles.heading}>←</Text>
+        <Text style={commonStyles.heading}>←</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.titleButton, { top: insets.top, right: insets.right + 36 }]}
+        style={[commonStyles.titleButton, { top: insets.top, right: insets.right + 36 }]}
         onPress={startEditing}
       >
-        <Text style={styles.heading}>✏️</Text>
+        <Text style={commonStyles.heading}>✏️</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.titleButton, { top: insets.top, right: insets.right + 4 }]}
+        style={[commonStyles.titleButton, { top: insets.top, right: insets.right + 4 }]}
         onPress={remove}
       >
-        <Text style={styles.heading}>🗑️</Text>
+        <Text style={commonStyles.heading}>🗑️</Text>
       </TouchableOpacity>
-      <Text style={[styles.heading, styles.title]}>{note.title}</Text>
+      <Text style={[commonStyles.heading, commonStyles.title]}>{note.title}</Text>
 
       <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom, paddingBottom: insets.bottom }]}>
         <Note note={note} />
@@ -97,22 +98,6 @@ export function ShowPage({ selectedId, goToList, startEditing }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  titleButton: {
-    position: 'absolute',
-    padding: 8,
-    zIndex: 1,
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  title: {
-    textAlign: 'center',
-    paddingTop: 8,
-  },
   listArea: {
     backgroundColor: '#f0f0f0',
     flex: 1,

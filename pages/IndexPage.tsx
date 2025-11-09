@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getNotes, NoteEntity, SortingDirection, SortingField } from '../helpers/db';
 import { Note } from '../components/Note';
 import { prettyDateTime } from '../helpers/date';
+import { commonStyles } from '../helpers/commonStyles';
 
 type Props = {
   selectId: (id: number) => void;
@@ -72,7 +73,7 @@ export function IndexPage({ selectId, createNote }: Props) {
 
   return (
     <View style={[
-      styles.container,
+      commonStyles.container,
       {
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -80,12 +81,12 @@ export function IndexPage({ selectId, createNote }: Props) {
         paddingRight: insets.right
       }
     ]}>
-      <Text style={styles.heading}>Синергичные заметки</Text>
+      <Text style={[commonStyles.heading, commonStyles.title]}>Синергичные заметки</Text>
       <TouchableOpacity
         style={[styles.addButton, { bottom: insets.bottom + 8 }]}
         onPress={createNote}
       >
-        <Text style={styles.heading}>+</Text>
+        <Text style={commonStyles.heading}>+</Text>
       </TouchableOpacity>
 
       <ScrollView style={[styles.listArea, { marginBottom: -insets.bottom }]}>
@@ -98,7 +99,7 @@ export function IndexPage({ selectId, createNote }: Props) {
                 <TextInput
                   onChangeText={setSearchText}
                   placeholder="Введите текст для поиска..."
-                  style={styles.input}
+                  style={commonStyles.input}
                   value={searchText}
                 />
                 {filteredNotes.length === 0 ? (
@@ -148,15 +149,6 @@ export function IndexPage({ selectId, createNote }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    paddingVertical: 8,
-  },
   addButton: {
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.2)',
@@ -170,19 +162,10 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     zIndex: 1,
   },
-  input: {
-    borderColor: '#4630eb',
-    backgroundColor: '#fff',
-    borderRadius: 4,
-    borderWidth: 1,
-    flex: 1,
-    height: 48,
-    marginBottom: 8,
-    padding: 8,
-  },
   listArea: {
     backgroundColor: '#f0f0f0',
     flex: 1,
+    marginTop: 16,
     paddingTop: 16,
     paddingHorizontal: 16,
   },
