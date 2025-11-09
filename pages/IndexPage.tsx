@@ -82,7 +82,7 @@ export function IndexPage({ selectId, createNote }: Props) {
     ]}>
       <Text style={styles.heading}>Синергичные заметки</Text>
       <TouchableOpacity
-        style={styles.addButton}
+        style={[styles.addButton, { bottom: insets.bottom + 8 }]}
         onPress={createNote}
       >
         <Text style={styles.heading}>+</Text>
@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     right: 8,
-    bottom: 32,
     width: 64,
     height: 64,
     backgroundColor:'#fff',
