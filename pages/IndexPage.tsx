@@ -213,7 +213,7 @@ export function IndexPage({ selectId, createNote }: Props) {
         {notes ? (
           <View style={{ paddingBottom: 2 * insets.bottom }}>
             {notes.length === 0 ? (
-              <Text style={styles.sectionHeading}>Пока нет заметок! Создайте новую, нажав на + в углу, или экспортируйте из файла!</Text>
+              <Text style={styles.sectionHeading}>Пока нет заметок! Создайте новую, нажав на + в углу, или импортируйте из файла!</Text>
             ) : (
               <>
                 <TextInput
